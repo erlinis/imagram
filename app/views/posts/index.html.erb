@@ -1,29 +1,38 @@
-<p id="notice"><%= notice %></p>
-
-<h1>Posts</h1>
-
-<table>
-  <thead>
-    <tr>
-      <th>Caption</th>
-      <th>Picture</th>
-      <th colspan="3"></th>
-    </tr>
-  </thead>
-
-  <tbody>
+<div class="posts-wrapper row">
     <% @posts.each do |post| %>
-      <tr>
-        <td><%= post.caption %></td>
-        <td><%= post.picture %></td>
-        <td><%= link_to 'Show', post %></td>
-        <td><%= link_to 'Edit', edit_post_path(post) %></td>
-        <td><%= link_to 'Destroy', post, method: :delete, data: { confirm: 'Are you sure?' } %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+      <div class="post">
+        <div class="post-head">
+          <div class="name">
+             Taller Pioneras
+          </div>
+        </div>
 
-<br>
+        <div class="image center-block">
+          <%= image_tag(post.picture_url, :class => "img-responsive") if post.picture.present? %>
+        </div>
+        <p class="caption"> <%= post.caption %> </p>
+
+        <% post.comments.each do |comment| %> <span class="text-muted">
+              <%= comment.created_at.to_formatted_s(:short) if comment.created_at.present? %>
+            </span> | <%= comment.content %>
+            <br>
+          <% end %>
+
+          <div class="form-wrapper">
+            <%= form_for([post, post.comments.build]) do |f| %>
+               <%= f.text_area :content, cols: 70 %>
+               <%= f.submit 'comment' %>
+            <% end %>
+          </div>
+
+        <div class="text-center edit-links">
+          <%= link_to 'Edit', edit_post_path(post) %>
+          |
+          <%= link_to 'Destroy', post, method: :delete, data: { confirm: 'Are you sure?' } %>
+        </div>
+        </div>
+
+    <% end %>
+</div>
 
 <%= link_to 'New Post', new_post_path %>

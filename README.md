@@ -168,3 +168,308 @@ por:
 > :floppy_disk: ¡Guarda todos los cambios!
 
 Ahora refresca tu navegador para ver los cambios.
+
+## 4. Añadiendo navegación
+
+La aplicación no se ve muy bien. Usaremos el proyecto [Bootstrap](http://getbootstrap.com/getting-started/) para darle un mejor estilo.
+
+Para esto instalaremos la gema que nos permite usarlo.
+
+Abre el archivo `Gemfile` en tu editor de código y  al final del archivo agrega:
+
+ ```ruby
+  gem 'bootstrap-sass', '~> 3.3.7'
+ ```
+
+En la terminal ejecuta:
+
+```sh
+bundle install
+```
+
+### Layout
+Ahora cambiaremos el layout de la aplicación, para est0 abre el archivo `app/views/layouts/application.html.erb` en tu editor de código y reemplaza *todo* el contenido por este:
+
+```ruby
+<html>
+  <head>
+    <title>Imagram</title>
+    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="navbar-container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">Imagram</a>
+        </div>
+        <div id="bs-navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><%= link_to "Posts", posts_path %></li>
+            <li><%= link_to "New Post", new_post_path %></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <br/>
+
+    <div class="container">
+      <br/>
+      <%= yield %>
+    </div>
+
+    <footer>
+      <div class="container">
+        <p>Imagram - Barranquilla 2018</p>
+      </div>
+    </footer>
+  </body>
+</html>
+```
+
+y ahora cambiaremos la forma como se muestran las publicaciones, para esto abre el archivo ` app/views/posts/index.html.erb` y reemplaza *todo* el contenido por este:
+
+```ruby
+<div class="posts-wrapper row">
+    <% @posts.each do |post| %>
+      <div class="post">
+        <div class="post-head">
+          <div class="name">
+             Taller Pioneras
+          </div>
+        </div>
+
+        <div class="image center-block">
+          <%= image_tag(post.picture_url, :class => "img-responsive") if post.picture.present? %>
+        </div>
+        <p class="caption"> <%= post.caption %> </p>
+        <div class="text-center edit-links">
+          <%= link_to 'Edit', edit_post_path(post) %>
+          |
+          <%= link_to 'Destroy', post, method: :delete, data: { confirm: 'Are you sure?' } %>
+        </div>
+      </div>
+
+    <% end %>
+</div>
+```
+
+
+### ¡Ahora el  *css*! 
+Ve al archivo *app/assets/stylesheets/application.css* y cambiar su exetensión a *.scss*
+
+Luego abre el archivo, y borra las siguiente lineas:
+
+```ruby
+ *= require_tree .
+ *= require_self
+```
+
+y al final del archivo pega este contenido:
+
+```ruby
+@import "bootstrap-sprockets";
+@import "bootstrap";
+
+body {
+ background-color: #dbe8f0;
+  font-family: proxima-nova, 'Helvetica Neue', Arial, Helvetica, sans-serif;
+}
+
+.navbar-brand {
+  a{
+    color: #125688;
+  }
+}
+
+.navbar-default {
+  background-color: #fff;
+  height: 54px;
+  .navbar-nav li a {
+    color: #125688;
+  }
+}
+
+.navbar-container {
+  width: 640px;
+  margin: 0 auto;
+}
+
+.posts-wrapper {
+  padding-top: 40px;
+  margin: 0 auto;
+  max-width: 642px;
+  width: 100%;
+}
+
+.post {
+  background-color: #fff;
+  border-color: #edeeee;
+  border-style: solid;
+  border-radius: 3px;
+  border-width: 1px;
+  margin-bottom: 60px;
+}
+
+.post-head {
+  height: 64px;
+  padding: 14px 20px;
+  color: #125688;
+  font-size: 15px;
+  line-height: 18px;
+  .thumbnail {
+  }
+  .name {
+    display: block;
+  }
+}
+
+.image {
+  border-bottom: 1px solid #eeefef;
+  border-top: 1px solid #eeefef;
+}
+
+.caption {
+  padding: 24px 24px;
+  font-size: 15px;
+  line-height: 18px;
+}
+
+.form-wrapper { width: 100%;
+  margin: 2px auto;
+  background-color: #fff;
+  padding: 10px;
+  border: 1px solid #eeefef;
+  border-radius: 3px;
+}
+
+.edit-links {
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+```
+
+> :floppy_disk: ¡Guarda todos los cambios!
+
+
+Mira como luce la aplicación y en [http://localhost:3000/posts](http://localhost:3000/posts)
+
+
+## 5. Agregando comentarios
+
+Seamos más sociales permitiendo que se puedan añadir comentarios sobre nuestros _posts_, para esto  en la terminal presionamos `Ctrl` + `C` para detener el servidor y ejecutamos el siguiente comando:
+
+```sh
+rails g model comments content:text post:references
+```
+
+Se generaran unos archivos, uno de los más importatntes es la migración, pues contiene la definición de la tabla donde se guardaran los comentarios.
+
+Ejecutamos la migración para crear la tabla en la base de datos con el comando: 
+
+```sh
+rake db:migrate
+```
+
+Creemos la relación entre _post_ y _comments_. Abrimos el archivo `app/models/post.rb` y debajo de la línea
+
+```ruby
+  mount_uploader :picture, PictureUploader
+```
+
+agregamos
+
+```ruby
+ has_many :comments, :dependent => :destroy
+ accepts_nested_attributes_for :comments,  :reject_if => lambda { |a| a[:content].blank? }, :allow_destroy => true
+```
+
+Ahora necesitamos una formulario para escribir los comentarios, entonces abrimos `app/views/posts/show.html.erb` y encima de las lineas
+
+```ruby
+ <div class="text-center edit-links">
+  <%= link_to 'Edit', edit_post_path(post) %>
+```
+
+agrega
+
+```ruby
+ <%= form_for([@post, @post.comments.build]) do |f| %>
+     <%= f.label :content %>
+     <%= f.text_area :content %>
+     <%= f.submit 'comment' %>
+  <% end %>
+```
+
+Ahoara creemos el archivo el controlador que se encargará de guardar los comentarios, en la terminal ejecutaremos:
+
+```sh
+rails g controller comments
+
+```
+
+Luego abre el archivo `app/controllers/comment_controller.rb` y pega
+
+```
+class CommentsController < ApplicationController
+  def create
+    @post = Post.find(params[:post_id])
+    @comment = @post.comments.new(comment_params)
+    @comment.save
+    redirect_to posts_path
+  end
+
+  private
+    def comment_params
+      params.require(:comment).permit(:content)
+    end
+end
+```
+
+en el archivo `config/routes` copia y pega
+```sh
+  root 'posts#index'
+  resources :posts do
+   resources :comments
+  end
+```
+
+> :floppy_disk: ¡Guarda todos los cambios!
+
+ Iniciamos nuevamente el servidor con:
+```sh
+rails server
+```
+
+
+Entra a [http://localhost:3000/posts](http://localhost:3000/posts) y agrega un comentario.
+
+Nótaras que no se pueden ver los comentario agregados, para poder visualizarlos entra al archivo `app/views/posts/index.html.erb` y encima de la linea
+
+```ruby
+<div class="form-wrapper">
+   <%= form_for([post, post.comments.build]) do |f| %>
+```
+
+agrega
+
+```ruby
+  <% post.comments.each do |comment| %> <span class="text-muted">
+      <%= comment.created_at.to_formatted_s(:short) if comment.created_at.present? %>
+    </span> | <%= comment.content %>
+    <br>
+  <% end %>
+
+```
+
+Ahora refresca tu navegador para ver los comentarios.
+
+
