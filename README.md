@@ -94,3 +94,77 @@ rails server
 
 Prueba lo que se ha generado hasta el momento ingresando a [http://localhost:3000/posts](http://localhost:3000/posts) en tu navegador.
 Crea,  edita y mira la información de los _posts_.
+
+
+
+## 3. Guardando imagenes
+
+Para subir imagenes a nuestro servidor necesitamos instalar una pieza de software, llamada `gema`.
+En Ruby, a las librerías se les conoce con el nombre de [gemas](https://blog.makeitreal.camp/manejo-de-dependencias-en-ruby-con-bundler/). Una librería no es más que código empaquetado que alguien publica y que puedes utilizar en tus proyectos.
+
+Usando tu editor texto abre el archivo `Gemfile` que se encuentra en la raíz del directorio  y al final de archivo agrega los siguiente:
+
+```ruby
+# Use Carrierwave to upload images on the server
+gem 'carrierwave'
+```
+
+> :floppy_disk: ¡Guarda los cambios!
+
+En la terminal ejecuta:
+
+```sh
+bundle install
+```
+
+Ahora podemos generar el código para el manejar la subida de imagenes, para eso en la terminal ejecuta:
+
+```sh
+rails generate uploader Picture
+```
+
+La gema que agregamos creará un nuevo archivo `app/uploaders/picture_uploader.rb`
+
+> Si el servidor está corriendo. Presiona `Ctrl` + `C` para cerrarlo y luego ejecuta `rails server` para iniciarlo.
+> Es necesario reiniciar el proceso del servidor Rails para que la aplicación pueda cargar el código generado por la librería recién agregada.
+
+Para usar el codigo generado previamente abrimos el archivo `app/models/post.rb` y debajo de la línea
+
+```ruby
+class Post < ApplicationRecord
+```
+agregamos
+
+```ruby
+  mount_uploader :picture, PictureUploader
+```
+
+Luego abre `app/views/posts/_form.html.erb` y cambia
+
+```ruby
+  <%= form.text_field :picture, id: :post_picture %>
+```
+
+por
+
+```ruby
+<%= form.file_field :picture, id: :post_picture %>
+````
+
+> :floppy_disk: ¡Guarda todos los cambios!
+
+Ingresa a [http://localhost:3000/posts](http://localhost:3000/posts) en tu navegador y agrega un nuevo _post_ con una imagen. Notarás cuando cargas una imagen que esta no se ve, esto es porque te muestra sólo la ruta del archivo, para arreglar eso abre el archivo `app/views/post/show.html.erb` y cambia
+
+```ruby
+<%= @post.picture %>
+```
+
+por:
+
+```ruby
+<%= image_tag(@post.picture_url, :width => 300) if @post.picture.present? %>
+````
+
+> :floppy_disk: ¡Guarda todos los cambios!
+
+Ahora refresca tu navegador para ver los cambios.
