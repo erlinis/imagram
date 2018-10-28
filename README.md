@@ -194,6 +194,7 @@ Ahora cambiaremos el layout de la aplicación, para est0 abre el archivo `app/vi
 <html>
   <head>
     <title>Imagram</title>
+    <%= csrf_meta_tags %>
     <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
     <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
   </head>
