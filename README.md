@@ -250,6 +250,7 @@ y ahora cambiaremos la forma como se muestran las publicaciones, para esto abre 
           <%= image_tag(post.picture_url, :class => "img-responsive") if post.picture.present? %>
         </div>
         <p class="caption"> <%= post.caption %> </p>
+
         <div class="text-center edit-links">
           <%= link_to 'Edit', edit_post_path(post) %>
           |
@@ -373,7 +374,7 @@ rails g model comments content:text post:references
 
 Se generaran unos archivos, uno de los más importatntes es la migración, pues contiene la definición de la tabla donde se guardaran los comentarios.
 
-Ejecutamos la migración para crear la tabla en la base de datos con el comando: 
+Ejecutamos la migración para crear la tabla en la base de datos con el comando:
 
 ```sh
 rake db:migrate
@@ -392,7 +393,7 @@ agregamos
  accepts_nested_attributes_for :comments,  :reject_if => lambda { |a| a[:content].blank? }, :allow_destroy => true
 ```
 
-Ahora necesitamos una formulario para escribir los comentarios, entonces abrimos `app/views/posts/show.html.erb` y encima de las lineas
+Ahora necesitamos una formulario para escribir los comentarios, entonces abrimos `app/views/posts/index.html.erb` y encima de las lineas
 
 ```ruby
  <div class="text-center edit-links">
@@ -402,11 +403,13 @@ Ahora necesitamos una formulario para escribir los comentarios, entonces abrimos
 agrega
 
 ```ruby
- <%= form_for([@post, @post.comments.build]) do |f| %>
+<div class="form-wrapper">
+ <%= form_for([post, post.comments.build]) do |f| %>
      <%= f.label :content %>
      <%= f.text_area :content %>
      <%= f.submit 'comment' %>
   <% end %>
+</div>
 ```
 
 Ahoara creemos el archivo el controlador que se encargará de guardar los comentarios, en la terminal ejecutaremos:
@@ -418,7 +421,7 @@ rails g controller comments
 
 Luego abre el archivo `app/controllers/comment_controller.rb` y pega
 
-```
+```ruby
 class CommentsController < ApplicationController
   def create
     @post = Post.find(params[:post_id])
@@ -434,8 +437,9 @@ class CommentsController < ApplicationController
 end
 ```
 
-en el archivo `config/routes` copia y pega
-```sh
+en el archivo `config/routes.rb`, borrar la linea `resources :posts`y agrega lo siguiente:
+
+```ruby
   root 'posts#index'
   resources :posts do
    resources :comments
